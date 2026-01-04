@@ -1,0 +1,80 @@
+C51 COMPILER V9.54   FAN                                                                   12/29/2025 13:50:51 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE FAN
+OBJECT MODULE PLACED IN .\Objects\Fan.obj
+COMPILER INVOKED BY: D:\IC_and_FPGA\MCU\stm32\Program\C51\BIN\C51.EXE ..\Codes\Fan.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJE
+                    -CTEXTEND PRINT(.\Listings\Fan.lst) OBJECT(.\Objects\Fan.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          #include "Fan.h"
+   3          
+   4          sbit FAN_IN1 = P1^0;
+   5          sbit FAN_IN2 = P1^1;
+   6          sbit FAN_ENA = P1^2;
+   7          
+   8          static volatile unsigned char PWM_Duty = 0; // 0~100
+   9          static unsigned char pwm_counter = 0;       // 0~99
+  10          
+  11          void Fan_Init(void)
+  12          {
+  13   1          FAN_IN1 = 0;
+  14   1          FAN_IN2 = 1;
+  15   1          FAN_ENA = 0;
+  16   1      
+  17   1          TMOD = (TMOD & 0xF0) | 0x02; // Timer0 方式2
+  18   1          TH0 = 156;                   // ~100us tick @12MHz
+  19   1          TL0 = 156;
+  20   1          ET0 = 1;
+  21   1          EA  = 1;
+  22   1          TR0 = 1;
+  23   1      }
+  24          
+  25          void Timer0_Routine(void) interrupt 1 // 表示定时器0的中断
+  26          {
+  27   1          pwm_counter++;
+  28   1          if (pwm_counter >= 100) pwm_counter = 0;
+  29   1      
+  30   1          if (pwm_counter < PWM_Duty) {
+  31   2              FAN_ENA = 1;
+  32   2          } else {
+  33   2              FAN_ENA = 0;
+  34   2          }
+  35   1      }
+  36          
+  37          void Fan_SetLevel(unsigned char level)
+  38          {
+  39   1          FAN_IN1 = 0;
+  40   1          FAN_IN2 = 1;
+  41   1      
+  42   1          switch (level) {
+  43   2          case 0: PWM_Duty = 0;   break;          // 0%
+  44   2          case 1: PWM_Duty = 70;  break;          // ~180/255 ≈ 70%
+  45   2          case 2: PWM_Duty = 83;  break;          // ~210/255 ≈ 83%
+  46   2          case 3: PWM_Duty = 100; break;          // 100%
+  47   2          default: PWM_Duty = 0;  break;
+  48   2          }
+  49   1      }
+  50          
+  51          unsigned char Fan_GetDutyPercent(void)
+  52          {
+  53   1          return PWM_Duty;
+  54   1      }
+C51 COMPILER V9.54   FAN                                                                   12/29/2025 13:50:51 PAGE 2   
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     98    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      2    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,1 @@
+"..\Codes\Fan.c" OPTIMIZE (8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\Fan.lst) OBJECT(.\Objects\Fan.obj)

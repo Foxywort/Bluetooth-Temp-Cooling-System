@@ -1,0 +1,10 @@
+".\Objects\STARTUP.obj",
+".\Objects\Delay.obj",
+".\Objects\DS18B20.obj",
+".\Objects\LCD1602.obj",
+".\Objects\main.obj",
+".\Objects\OneWire.obj",
+".\Objects\UART.obj",
+".\Objects\Fan.obj" 
+TO ".\Objects\temperatureSensor" 
+PRINT(".\Listings\temperatureSensor.m51") RAMSIZE(256) 

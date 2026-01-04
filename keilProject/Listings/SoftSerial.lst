@@ -1,0 +1,77 @@
+C51 COMPILER V9.54   SOFTSERIAL                                                            12/29/2025 13:41:43 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE SOFTSERIAL
+OBJECT MODULE PLACED IN .\Objects\SoftSerial.obj
+COMPILER INVOKED BY: D:\IC_and_FPGA\MCU\stm32\Program\C51\BIN\C51.EXE ..\Codes\SoftSerial.c OPTIMIZE(8,SPEED) BROWSE DEB
+                    -UG OBJECTEXTEND PRINT(.\Listings\SoftSerial.lst) OBJECT(.\Objects\SoftSerial.obj)
+
+line level    source
+
+   1          // @这个是软件模拟UART，已经放弃用了，直接使用51单片机的硬件UART接口就行了
+   2          
+   3          
+   4          #include <REGX52.H>
+   5          #include "SoftSerial.h"
+   6          
+   7          sbit BT_TX = P1^0;
+   8          sbit BT_RX = P1^1;
+   9          
+  10          static void SoftSerial_BitDelay(void)  // 模拟9600bps的波特率
+  11          {
+  12   1          TH0 = 0xFF;
+  13   1          TL0 = 0x98;
+  14   1          TF0 = 0;
+  15   1          TR0 = 1;
+  16   1          while(!TF0);
+  17   1          TR0 = 0;
+  18   1      }
+  19          
+  20          void SoftSerial_Init(void)
+  21          {
+  22   1          BT_TX = 1; // 空闲状态，把TXD线拉高
+  23   1          TMOD = (TMOD & 0xF0) | 0x01; // 清楚Timer0的内容，保留Timer1的设置。将Timer1设定为 模
+             -式1 （16为定时器）
+  24   1          TR0 = 0;
+  25   1          TF0 = 0;
+  26   1      }
+  27          
+  28          void SoftSerial_SendByte(unsigned char Byte)
+  29          {
+  30   1          unsigned char i;
+  31   1          BT_TX = 0;  // 起始位拉低
+  32   1          SoftSerial_BitDelay();
+  33   1          for(i=0;i<8;i++)  // 数据位 LSB模式
+  34   1          {
+  35   2              BT_TX = (Byte>>i)&0x01;  
+  36   2              SoftSerial_BitDelay();
+  37   2          }
+  38   1          BT_TX = 1;  // 停止位
+  39   1          SoftSerial_BitDelay();
+  40   1      }
+  41          
+  42          void SoftSerial_SendString(char *String)
+  43          {
+  44   1          unsigned char i=0;
+  45   1          while(String[i]!='\0')
+  46   1          {
+  47   2              SoftSerial_SendByte(String[i]);
+  48   2              i++;
+  49   2          }
+  50   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+C51 COMPILER V9.54   SOFTSERIAL                                                            12/29/2025 13:41:43 PAGE 2   
+
+   CODE SIZE        =     95    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       3
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
